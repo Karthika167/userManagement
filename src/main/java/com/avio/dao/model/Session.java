@@ -3,6 +3,8 @@ package com.avio.dao.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.ColumnTransformer;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +28,8 @@ public class Session {
 	@Column(name = "token_hash", nullable = false)
 	private String tokenHash;
 
+	
+    @ColumnTransformer(write = "?::inet")
 	@Column(name = "ip_address", columnDefinition = "inet", nullable = false)
 	private String ipAddress;
 

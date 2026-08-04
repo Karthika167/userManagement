@@ -5,13 +5,7 @@ public class AuthenticateResponse {
 
 	private String status;
 	
-	private String userRole;
-	
-	private String firstName;
-	
-	private String lastName;
-	
-	private String organization;
+	private UserDetailsView userDetails;
 
 	public String getStatus() {
 		return status;
@@ -21,39 +15,14 @@ public class AuthenticateResponse {
 		this.status = status;
 	}
 
-	public String getUserRole() {
-		return userRole;
+	public UserDetailsView getUserDetails() {
+		return userDetails;
 	}
 
-	public void setUserRole(String userRole) {
-		this.userRole = userRole;
+	public void setUserDetails(UserDetailsView userDetails) {
+		this.userDetails = userDetails;
 	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getOrganization() {
-		return organization;
-	}
-
-	public void setOrganization(String organization) {
-		this.organization = organization;
-	}
-	
-	
+		
 	
 	
 }
