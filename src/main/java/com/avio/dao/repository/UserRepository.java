@@ -11,18 +11,29 @@ import org.springframework.stereotype.Repository;
 
 import com.avio.dao.model.User;
 
+import jakarta.transaction.Transactional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-	
-	
+
 	User findByUsernameAndPasswordHash(String username, String passwordHash);
 
-    User findByEmailAndPasswordHash(String email, String passwordHash);
+	User findByEmailAndPasswordHash(String email, String passwordHash);
 
-    @Modifying
-    @Query("UPDATE User u SET u.lastLoginAt = :lastLoginAt WHERE u.userId = :userId")
-    int updateLastLogin(@Param("userId") UUID userId, @Param("lastLoginAt") LocalDateTime locaLocalDateTime);
+	@Modifying
+	@Query("UPDATE User u SET u.lastLoginAt = :lastLoginAt WHERE u.userId = :userId")
+	int updateLastLogin(@Param("userId") UUID userId, @Param("lastLoginAt") LocalDateTime locaLocalDateTime);
 
-	
+	@Modifying
+	@Transactional
+	@Query("UPDATE User u SET u.passwordHash = :newPassword WHERE u.userId = :userId")
+	int updatePasswordHash(@Param("userId") UUID userId, @Param("newPassword") String newPassword);
+
 }
-	
+
+//@Modifying
+//@Transactional
+//@Query("UPDATE User u SET u.passwordHash = :newPasswordHash, u.updatedAt = :updatedAt WHERE u.userId = :userId")
+//int updatePasswordHash(@Param("userId") UUID userId,
+//                        @Param("newPasswordHash") String newPasswordHash,
+//                        @Param("updatedAt") LocalDateTime updatedAt);

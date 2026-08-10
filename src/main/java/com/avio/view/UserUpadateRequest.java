@@ -2,10 +2,11 @@ package com.avio.view;
 
 import java.util.ArrayList;
 
-public class UserDetailsView {
+public class UserUpadateRequest {
 
+	
 	private String firstName;
-
+	
 	private String lastName;
 
 	private String email;
@@ -14,9 +15,9 @@ public class UserDetailsView {
 
 	private String department;
 
-	private String createdAt;
-
 	private ArrayList<String> userRoles;
+	
+	
 
 	public String getFirstName() {
 		return firstName;
@@ -34,14 +35,7 @@ public class UserDetailsView {
 		this.lastName = lastName;
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
+	
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
@@ -66,14 +60,12 @@ public class UserDetailsView {
 		this.userRoles = userRoles;
 	}
 
-	public String getCreatedAt() {
-		return createdAt;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setCreatedAt(String createdAt) {
-		this.createdAt = createdAt;
+	public void setEmail(String email) {
+		this.email = email;
 	}
-
-
-
 }
+	

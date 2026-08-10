@@ -1,5 +1,7 @@
 package com.avio.view;
 
+import java.util.UUID;
+
 public class AuthenticateResponse {
 	
 
@@ -7,6 +9,8 @@ public class AuthenticateResponse {
 	
 	private UserDetailsView userDetails;
 
+	private UUID session;
+	
 	public String getStatus() {
 		return status;
 	}
@@ -21,6 +25,14 @@ public class AuthenticateResponse {
 
 	public void setUserDetails(UserDetailsView userDetails) {
 		this.userDetails = userDetails;
+	}
+
+	public UUID getSession() {
+		return session;
+	}
+
+	public void setSession(UUID session) {
+		this.session = session;
 	}
 		
 	

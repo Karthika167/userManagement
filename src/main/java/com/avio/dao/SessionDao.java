@@ -33,10 +33,14 @@ public class SessionDao {
 	   
 
 }
-	@Transactional
+	@org.springframework.transaction.annotation.Transactional
 	public void logout(UUID sessionId) {
-	    sessionRepository.revokeSession(sessionId, LocalDateTime.now());
+	   
+	    int rows = sessionRepository.revokeSession(sessionId, LocalDateTime.now());
+	    System.out.println("Rows updated: " + rows);
 	}
+	
+	
 	
 	
 	
