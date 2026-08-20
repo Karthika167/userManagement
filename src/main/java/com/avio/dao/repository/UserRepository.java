@@ -1,6 +1,7 @@
 package com.avio.dao.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,13 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	User findByUsernameAndPasswordHash(String username, String passwordHash);
 
 	User findByEmailAndPasswordHash(String email, String passwordHash);
+	
+	List<User> findByOrganization_OrgId(UUID orgId);
+
+	User findByUsername(String username);
+
+	User findByEmail(String email);
+	
 
 	@Modifying
 	@Query("UPDATE User u SET u.lastLoginAt = :lastLoginAt WHERE u.userId = :userId")
@@ -28,12 +36,16 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	@Transactional
 	@Query("UPDATE User u SET u.passwordHash = :newPassword WHERE u.userId = :userId")
 	int updatePasswordHash(@Param("userId") UUID userId, @Param("newPassword") String newPassword);
+	
+	// --- update existence checks for create ---
+
+	boolean existsByEmail(String email);
+
+	
+
+
+
+	
 
 }
 
-//@Modifying
-//@Transactional
-//@Query("UPDATE User u SET u.passwordHash = :newPasswordHash, u.updatedAt = :updatedAt WHERE u.userId = :userId")
-//int updatePasswordHash(@Param("userId") UUID userId,
-//                        @Param("newPasswordHash") String newPasswordHash,
-//                        @Param("updatedAt") LocalDateTime updatedAt);

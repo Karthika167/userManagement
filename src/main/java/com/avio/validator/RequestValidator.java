@@ -1,12 +1,20 @@
 package com.avio.validator;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import com.avio.dao.repository.UserRepository;
 import com.avio.view.AuthenticateRequest;
+import com.avio.view.CreateUserRequest;
 import com.avio.view.PasswordRequest;
 import com.avio.view.UserUpadateRequest;
 
+
+@Component   // <-- 1. make it a Spring bean so @Autowired actually works
 public class RequestValidator {
+	
+
 
 	public static void validateAuthenticaterequest(AuthenticateRequest request) throws Exception {
 
@@ -56,6 +64,19 @@ public class RequestValidator {
 	}
 	
 		
+	public static void validateUserListrequest(AuthenticateRequest request) throws Exception {
 
+		if (StringUtils.isBlank(request.getUsername())&& StringUtils.isBlank(request.getEmail())) {
+			throw new Exception("Missing Mandatory Parameter:-  Username/emailId");
+		}
+	}
+
+	
+	
+
+
+	
+	
+	
 
 }

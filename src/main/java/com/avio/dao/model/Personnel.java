@@ -3,6 +3,7 @@ package com.avio.dao.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +18,7 @@ import jakarta.persistence.Table;
 @Table(name = "personnel")
 public class Personnel {
 	
+
 	@Id
     @GeneratedValue
     @Column(name = "person_id")
@@ -33,7 +35,7 @@ public class Personnel {
     private String lastName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role")
     private PersonnelRole role;
 
     @Column(name = "license_number", length = 50)
@@ -48,7 +50,7 @@ public class Personnel {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
     
-    @Column(name = "phone_number ")
+    @Column(name = "phone_number")
     private String phoneNumber ;
    
 

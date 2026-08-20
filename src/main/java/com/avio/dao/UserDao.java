@@ -1,6 +1,8 @@
 package com.avio.dao;
-
+import com.avio.dao.repository.PersonalRepository;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,16 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.avio.dao.model.Personnel;
 import com.avio.dao.model.User;
 import com.avio.dao.repository.UserRepository;
-import com.avio.view.UserUpadateRequest;
+import com.avio.view.UserProfileUpadateRequest;
 
 @Repository
 public class UserDao {
 
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private PersonalRepository personalRepository;
+
 
 	@Transactional
 	public User authenticateUser(String username, String password, String email) throws Exception {
@@ -40,25 +44,102 @@ public class UserDao {
 	}
 
 	@Transactional
-	public User changePassword(String email, String username, String currentPassword, String newPassword)
-			throws Exception {
+	public User changePassword(UUID userId, String currentPassword, String newPassword) throws Exception {
+
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+
+	    if (!StringUtils.equals(currentPassword, user.getPasswordHash())) {
+	    	System.out.println("inside incorrect pwd");
+	        throw new Exception("The current password you entered is incorrect.");
+	    }
+	    System.out.println(user.getEmail());
+	    user.setPasswordHash(newPassword);
+
+	    return userRepository.save(user);
+	}
+
+	@Transactional
+	public List<User> getUserList(String email, String username) throws Exception {
 
 		User user = null;
 		if (StringUtils.isNotBlank(username)) {
 			System.out.println("username");
-			user = userRepository.findByUsernameAndPasswordHash(username, currentPassword);
+			user = userRepository.findByUsername(username);
 		} else {
 
 			System.out.println("inside else");
-			user = userRepository.findByEmailAndPasswordHash(email, currentPassword);
+			user = userRepository.findByEmail(email);
 		}
 		if (user == null) {
-			throw new Exception("invalid password, give correct password");
+			throw new Exception("User not found for given emai Id.");
 		}
 
-		userRepository.updatePasswordHash(user.getUserId(), newPassword);
+		return userRepository.findByOrganization_OrgId(user.getOrganization().getOrgId());
 
-		return user;
 	}
+
+	@Transactional
+	public User createUser(User user) throws Exception{
+		
+
+		 if (personalRepository.existsByEmail(user.getPersonnel().getEmail())) {
+		        throw new Exception("A user with this email already exists.");
+		    }
+
+		    String phoneNumber = user.getPersonnel() != null ? user.getPersonnel().getPhoneNumber() : null;
+		    if (phoneNumber != null && personalRepository.existsByPhoneNumber(phoneNumber)) {
+		        throw new Exception("A user with this phone number already exists.");
+		    }
+
+		    return userRepository.save(user);
+	}
+
+
+
+	@Transactional
+	public User getUserbyUserId(UUID userId) {
+		
+		
+		Optional<User> user = userRepository.findById(userId);
+
+		return user.get(); // means ?
+	}
+
+	
+	@Transactional
+	public void updatUser(User userTobeUpdated) throws Exception {
+		
+
+		
+  	userRepository.save(userTobeUpdated);
+		
+
+	}
+	
+	
+
+	@Transactional
+	public void deleteUser(UUID userId) {
+		if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("Customer not found");
+        }
+		userRepository.deleteById(userId);
+		
+	}
+	@Transactional
+	public void checkUserEmailExists(String email) throws Exception {
+		
+
+		if (userRepository.existsByEmail(email)) {
+			
+		
+		        throw new Exception("A user with this email already exists.");
+			    }
+//		
+	}
+
+	
+	
 
 }

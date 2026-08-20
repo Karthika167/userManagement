@@ -14,9 +14,12 @@ public class UserUpadateRequest {
 	private String phoneNumber;
 
 	private String department;
+	
 
 	private ArrayList<String> userRoles;
 	
+	
+
 	
 
 	public String getFirstName() {

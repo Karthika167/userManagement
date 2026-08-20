@@ -7,6 +7,8 @@ public class AuthenticateResponse {
 
 	private String status;
 	
+	private String token;
+	
 	private UserDetailsView userDetails;
 
 	private UUID session;
@@ -33,6 +35,14 @@ public class AuthenticateResponse {
 
 	public void setSession(UUID session) {
 		this.session = session;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 		
 	

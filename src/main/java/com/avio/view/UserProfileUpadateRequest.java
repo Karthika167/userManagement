@@ -1,14 +1,12 @@
 package com.avio.view;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
-public class UserDetailsView {
+public class UserProfileUpadateRequest {
 
-	private UUID userId;
 	
 	private String firstName;
-
+	
 	private String lastName;
 
 	private String email;
@@ -16,19 +14,22 @@ public class UserDetailsView {
 	private String phoneNumber;
 
 	private String department;
-
-	private String createdAt;
-
-	private boolean isActive;
-
+	
+	private String password;
+	
+	
 	private ArrayList<String> userRoles;
+	
+	
 
-	public UUID getUserId() {
-		return userId;
+	
+
+	public String getPassword() {
+		return password;
 	}
 
-	public void setUserId(UUID userId) {
-		this.userId = userId;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String getFirstName() {
@@ -47,14 +48,7 @@ public class UserDetailsView {
 		this.lastName = lastName;
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
+	
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
@@ -79,20 +73,12 @@ public class UserDetailsView {
 		this.userRoles = userRoles;
 	}
 
-	public String getCreatedAt() {
-		return createdAt;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setCreatedAt(String createdAt) {
-		this.createdAt = createdAt;
+	public void setEmail(String email) {
+		this.email = email;
 	}
-
-	public boolean isActive() {
-		return isActive;
-	}
-
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-
 }
+	
