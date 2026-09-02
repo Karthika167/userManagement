@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 //import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.avio.service.RoleService;
 import com.avio.service.UserService;
 import com.avio.util.JwtUtil;
 import com.avio.view.AuthenticateRequest;
@@ -33,10 +35,13 @@ public class UserController {
 
 	@Autowired
 	UserService userService;
-	
+
+	@Autowired
+	RoleService roleService;
+
 	@Autowired
 	JwtUtil jwtUtil;
-
+ // login
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	public ResponseEntity<?> authenticate(HttpServletRequest httpRequest, @RequestBody AuthenticateRequest request)
 			throws Exception {
@@ -56,10 +61,10 @@ public class UserController {
 		userService.logout(sessionId);
 		return ResponseEntity.ok().body("Logged out successfully");
 	}
-	
 
 	@RequestMapping(value = "/changePassword", method = RequestMethod.POST)
-	public ResponseEntity<?> passwordChange(@RequestBody PasswordRequest passwordRequest, @RequestHeader("Authorization") String authHeader) throws Exception {
+	public ResponseEntity<?> passwordChange(@RequestBody PasswordRequest passwordRequest,
+			@RequestHeader("Authorization") String authHeader) throws Exception {
 
 		String token = authHeader.replace("Bearer ", "");
 		if (!jwtUtil.isTokenValid(token)) {
@@ -71,13 +76,22 @@ public class UserController {
 
 	}
 
-	// update user
+	// update user profile
 	@RequestMapping(value = "/updateUser", method = RequestMethod.POST)
-	public ResponseEntity<?> updateUser(@RequestBody UserUpadateRequest userUpadateRequest) throws Exception {
+	public ResponseEntity<?> updateUser(@RequestBody UserUpadateRequest userUpadateRequest,
+			@RequestHeader("Authorization") String authHeader) throws Exception {
 
-		return userService.updateUser(userUpadateRequest);
+		String token = authHeader.replace("Bearer ", "");
+		if (!jwtUtil.isTokenValid(token)) {
+			return ResponseEntity.status(401).body("Invalid or expired token");
+		}
+
+		UUID userId = jwtUtil.extractUserId(token);
+
+		return userService.updateUser(userId, userUpadateRequest);
 
 	}
+//user list
 
 	@RequestMapping(value = "/getUsers", method = RequestMethod.POST)
 	public ResponseEntity<?> getUsers(@RequestBody AuthenticateRequest request) throws Exception {
@@ -87,8 +101,15 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/createUser", method = RequestMethod.PUT)
-	public ResponseEntity<?> createUser(@RequestBody CreateUserRequest userRequest) throws Exception {
-		return userService.createUser(userRequest);
+	public ResponseEntity<?> createUser(@RequestBody CreateUserRequest userRequest,
+			@RequestHeader("Authorization") String authHeader) throws Exception {
+
+		String token = authHeader.replace("Bearer ", "");
+		if (!jwtUtil.isTokenValid(token)) {
+			return ResponseEntity.status(401).body("Invalid or expired token");
+		}
+
+		return userService.createUser(userRequest, jwtUtil.extractOrgId(token), jwtUtil.extractUserId(token));
 
 	}
 
@@ -111,6 +132,18 @@ public class UserController {
 	public ResponseEntity<?> deleteUser(@PathVariable UUID userId) throws Exception {
 
 		return userService.deleteUser(userId);
+
+	}
+
+	@RequestMapping(value = "/roles", method = RequestMethod.GET)
+	public ResponseEntity<?> getRoles(@RequestHeader("Authorization") String authHeader) throws Exception {
+
+		String token = authHeader.replace("Bearer ", "");
+		if (!jwtUtil.isTokenValid(token)) {
+			return ResponseEntity.status(401).body("Invalid or expired token");
+		}
+
+		return roleService.getroles(jwtUtil.extractOrgId(token));
 
 	}
 

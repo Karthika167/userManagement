@@ -2,6 +2,7 @@ package com.avio.dao.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +27,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	User findByUsername(String username);
 
 	User findByEmail(String email);
+	
+	Optional<User> findByUserId(UUID userId);
 	
 
 	@Modifying

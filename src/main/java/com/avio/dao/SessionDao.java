@@ -39,6 +39,11 @@ public class SessionDao {
 	    int rows = sessionRepository.revokeSession(sessionId, LocalDateTime.now());
 	    System.out.println("Rows updated: " + rows);
 	}
+	@Transactional
+	public void deleteByUserId(UUID userId) {
+		sessionRepository.deleteByUser_UserId(userId);
+		
+	}
 	
 	
 	

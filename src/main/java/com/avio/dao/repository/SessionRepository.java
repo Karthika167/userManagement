@@ -27,7 +27,8 @@ public interface SessionRepository extends JpaRepository<Session, UUID>{
     @Modifying
     @Query("UPDATE Session s SET s.revokedAt = :revokedAt WHERE s.user.userId = :userId AND s.revokedAt IS NULL")
     int revokeAllSessionsForUser(@Param("userId") UUID userId, @Param("revokedAt") LocalDateTime revokedAt);
-	
+    
+    void deleteByUser_UserId(UUID userId);
 	
 }
 

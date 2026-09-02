@@ -24,6 +24,23 @@ public class UserRoleDao {
 		return userRoleRepository.findByUser_UserId(userId);
 	
 	}
+	
+	@Transactional
+	public List<UserRole> createUserRole(List<UserRole> userRoles) throws Exception {
+
+		return userRoleRepository.saveAll(userRoles);
+	
+	}
+
+	 @Transactional
+	    public void deleteByUserId(UUID userId) {
+	        userRoleRepository.deleteByUserId(userId);
+	    }
+
+//	    @Transactional
+//	    public void reassignAssignedBy(UUID userId, UUID fallbackUserId) {
+//	        userRoleRepository.reassignAssignedBy(userId, fallbackUserId);
+//	    }
 
 
 }

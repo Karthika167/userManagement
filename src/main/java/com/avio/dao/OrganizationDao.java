@@ -22,9 +22,9 @@ public class OrganizationDao {
 	private OrganizationRepository organizationRepository ;
 
 	@Transactional
-	public Organization getOrganization(String name) throws Exception {
+	public Organization getOrganization(UUID orgId) throws Exception {
 
-		return organizationRepository.findByName(name);
+		return organizationRepository.getReferenceById(orgId);
 	
 	}
 

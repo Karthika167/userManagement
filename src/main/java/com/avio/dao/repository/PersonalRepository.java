@@ -41,6 +41,7 @@ public interface PersonalRepository extends JpaRepository<Personnel, UUID> {
 	// --- existence checks for create ---
 	
 	boolean existsByEmail(String email);
+	
 	boolean existsByPhoneNumber(String phoneNumber);
 	
 

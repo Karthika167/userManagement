@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.avio.dao.model.Personnel;
+import com.avio.dao.model.User;
 import com.avio.dao.repository.PersonalRepository;
 import com.avio.view.CreateUserRequest;
 import com.avio.view.UserProfileUpadateRequest;
@@ -42,14 +43,26 @@ public class PersonnelDao {
 
 	
 	@Transactional
-	public void checkUserPhoneNumberExists(UUID personId ,String phoneNumber) throws Exception {
+	public void checkUserPhoneNumberExists(String phoneNumber) throws Exception {
 		
-		if (personalRepository.existsByPhoneNumberAndPersonIdNot(phoneNumber, personId)) {
+		if (personalRepository.existsByPhoneNumber(phoneNumber)) {
 
 			throw new Exception("A user with this phone number already exists.");
 		}
 
 		
+	}
+
+	public void checkUserDetails(CreateUserRequest userRequest) throws Exception {
+		 if (personalRepository.existsByEmail(userRequest.getEmail())) {
+		        throw new Exception("A user with this email already exists.");
+		    }
+
+		    
+		    if ( personalRepository.existsByPhoneNumber(userRequest.getPhoneNumber())) {
+		        throw new Exception("A user with this phone number already exists.");
+		    }
+
 	}
 
 }

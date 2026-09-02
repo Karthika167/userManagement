@@ -64,11 +64,11 @@ public class UserDao {
 
 		User user = null;
 		if (StringUtils.isNotBlank(username)) {
-			System.out.println("username");
+//			System.out.println("username");
 			user = userRepository.findByUsername(username);
 		} else {
 
-			System.out.println("inside else");
+//			System.out.println("inside else");
 			user = userRepository.findByEmail(email);
 		}
 		if (user == null) {
@@ -78,20 +78,12 @@ public class UserDao {
 		return userRepository.findByOrganization_OrgId(user.getOrganization().getOrgId());
 
 	}
-
+// create user by Admin
 	@Transactional
 	public User createUser(User user) throws Exception{
 		
 
-		 if (personalRepository.existsByEmail(user.getPersonnel().getEmail())) {
-		        throw new Exception("A user with this email already exists.");
-		    }
-
-		    String phoneNumber = user.getPersonnel() != null ? user.getPersonnel().getPhoneNumber() : null;
-		    if (phoneNumber != null && personalRepository.existsByPhoneNumber(phoneNumber)) {
-		        throw new Exception("A user with this phone number already exists.");
-		    }
-
+		
 		    return userRepository.save(user);
 	}
 
@@ -121,9 +113,7 @@ public class UserDao {
 
 	@Transactional
 	public void deleteUser(UUID userId) {
-		if (!userRepository.existsById(userId)) {
-            throw new RuntimeException("Customer not found");
-        }
+		
 		userRepository.deleteById(userId);
 		
 	}
@@ -139,7 +129,16 @@ public class UserDao {
 //		
 	}
 
+	public Optional<User> findById(UUID userId) {
+		return userRepository.findById(userId);
+	}
+
+
+		
+		 
+	}
+
 	
 	
 
-}
+

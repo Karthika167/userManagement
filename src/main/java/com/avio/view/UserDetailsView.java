@@ -21,7 +21,7 @@ public class UserDetailsView {
 
 	private boolean isActive;
 
-	private ArrayList<String> userRoles;
+	private ArrayList<RoleView> userRoles;
 
 	public UUID getUserId() {
 		return userId;
@@ -71,11 +71,11 @@ public class UserDetailsView {
 		this.department = department;
 	}
 
-	public ArrayList<String> getUserRoles() {
+	public ArrayList<RoleView> getUserRoles() {
 		return userRoles;
 	}
 
-	public void setUserRoles(ArrayList<String> userRoles) {
+	public void setUserRoles(ArrayList<RoleView> userRoles) {
 		this.userRoles = userRoles;
 	}
 

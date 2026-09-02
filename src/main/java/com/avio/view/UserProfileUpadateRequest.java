@@ -17,11 +17,9 @@ public class UserProfileUpadateRequest {
 	
 	private String password;
 	
+	private boolean active;
 	
 	private ArrayList<String> userRoles;
-	
-	
-
 	
 
 	public String getPassword() {
@@ -79,6 +77,14 @@ public class UserProfileUpadateRequest {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }
 	

@@ -1,24 +1,27 @@
 package com.avio.service;
 
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.avio.config.Base64Example;
+
 import com.avio.dao.OrganizationDao;
 import com.avio.dao.PersonnelDao;
+import com.avio.dao.RoleDao;
 import com.avio.dao.SessionDao;
 import com.avio.dao.UserDao;
 import com.avio.dao.UserRoleDao;
+import com.avio.dao.model.Organization;
+import com.avio.dao.model.Role;
+import com.avio.dao.model.Session;
 import com.avio.dao.model.User;
 import com.avio.dao.model.UserRole;
-import com.avio.dao.repository.UserRepository;
 import com.avio.mapper.UserMapper;
 import com.avio.util.JwtUtil;
 import com.avio.validator.RequestValidator;
@@ -33,14 +36,6 @@ import com.avio.view.UserListResponse;
 import com.avio.view.UserProfileUpadateRequest;
 import com.avio.view.UserUpadateRequest;
 
-import jakarta.transaction.TransactionScoped;
-import jakarta.transaction.Transactional;
-
-import com.avio.dao.model.Organization;
-import com.avio.dao.model.Personnel;
-import com.avio.dao.model.PersonnelRole;
-import com.avio.dao.model.Session;
-
 @Service
 public class UserService {
 
@@ -53,6 +48,9 @@ public class UserService {
 
 	@Autowired
 	UserRoleDao userRoleDao;
+
+	@Autowired
+	RoleDao roleDao;
 
 	@Autowired
 	PersonnelDao personnelDao;
@@ -73,14 +71,11 @@ public class UserService {
 		User user = userDao.authenticateUser(request.getUsername(), request.getPassword(), request.getEmail());
 
 		List<UserRole> userRoles = userRoleDao.getUserRole(user.getUserId());
-		ArrayList<String> roles = new ArrayList<>();
-		for (UserRole userRole : userRoles) {
-			roles.add(userRole.getRole().getRoleName());
-		}
 
 		// String tokenHash = "this is token";
-		String tokenHash = jwtUtil.generateToken(user.getUserId(), user.getEmail(), List.of()); // roles empty list for
-																								// now, wire in later
+		String tokenHash = jwtUtil.generateToken(user.getUserId(), user.getEmail(), user.getOrganization().getOrgId(),
+				List.of()); // roles empty list for
+		// now, wire in later
 		Session session = (Session) sessionDao.createSession(user, tokenHash, ipAddress, userAgent);
 
 		AuthenticateResponse response = new AuthenticateResponse();
@@ -93,7 +88,7 @@ public class UserService {
 		userDetails.setEmail(user.getPersonnel().getEmail());
 		userDetails.setPhoneNumber(user.getPersonnel().getPhoneNumber());
 		userDetails.setDepartment(user.getPersonnel().getRole().getDisplayName());
-		userDetails.setUserRoles(roles);
+		userDetails.setUserRoles(UserMapper.mapUserRole(userRoles));
 		userDetails.setCreatedAt(String.valueOf(user.getCreatedAt()));
 
 		response.setUserDetails(userDetails);
@@ -118,7 +113,19 @@ public class UserService {
 	}
 
 //	profile update
-	public ResponseEntity<PasswordResponse> updateUser(UserUpadateRequest userUpadateRequest) throws Exception {
+	public ResponseEntity<PasswordResponse> updateUser(UUID userId, UserUpadateRequest userUpadateRequest)
+			throws Exception {
+
+		User profileUpdate = userDao.findById(userId).orElseThrow(() -> new Exception("User not found: " + userId));
+
+
+		if (StringUtils.isNotBlank(userUpadateRequest.getPhoneNumber()) && !Strings.CI
+				.equals(userUpadateRequest.getPhoneNumber(), profileUpdate.getPersonnel().getPhoneNumber())) {
+
+//			System.out.println(userUpadateRequest.getPhoneNumber());
+
+			personnelDao.checkUserPhoneNumberExists(userUpadateRequest.getPhoneNumber());
+		}
 
 		RequestValidator.ValidateUserUpdate(userUpadateRequest);
 
@@ -135,10 +142,10 @@ public class UserService {
 		sessionDao.logout(sessionId);
 	}
 
-	// User List
+	// User List view by Admin
 	public ResponseEntity<UserListResponse> getUserList(AuthenticateRequest request) throws Exception {
 
-		RequestValidator.validateUserListrequest(request);
+		// RequestValidator.validateUserListrequest(request);
 
 		List<User> users = userDao.getUserList(request.getEmail(), request.getUsername());
 
@@ -147,6 +154,7 @@ public class UserService {
 		ArrayList<UserDetailsView> userList = new ArrayList<UserDetailsView>();
 		UserDetailsView userDetail;
 		List<UserRole> userRoles;
+
 		for (User user : users) {
 			userDetail = new UserDetailsView();
 
@@ -159,11 +167,7 @@ public class UserService {
 			userDetail.setActive(user.isActive());
 			userRoles = userRoleDao.getUserRole(user.getUserId());
 
-			ArrayList<String> roles = new ArrayList<>();
-			for (UserRole userRole : userRoles) {
-				roles.add(userRole.getRole().getRoleName());
-			}
-			userDetail.setUserRoles(roles);
+			userDetail.setUserRoles(UserMapper.mapUserRole(userRoles));
 
 			userList.add(userDetail);
 		}
@@ -176,34 +180,42 @@ public class UserService {
 
 	// Add New user By Admin
 
-	public ResponseEntity<CreateUserResponse> createUser(CreateUserRequest userRequest) throws Exception {
+	public ResponseEntity<CreateUserResponse> createUser(CreateUserRequest userRequest, UUID orgId, UUID logedInUserId)
+			throws Exception {
 
-		Personnel personnel = new Personnel();
-		personnel.setFirstName(userRequest.getFirstName());
-		personnel.setLastName(userRequest.getLastName());
-		personnel.setEmail(userRequest.getEmail());
-		personnel.setPhoneNumber(userRequest.getPhoneNumber());
+		personnelDao.checkUserDetails(userRequest); // check email and phone Number existing
 
-		Organization org = organizationDao.getOrganization("Trivandrum International Airport");
+		Organization org = organizationDao.getOrganization(orgId);
+		User loggedInUser = userDao.getUserbyUserId(logedInUserId);
 
-		personnel.setOrganization(org);
-		personnel.setRole(PersonnelRole.ACCOUNTABLE_MANAGER); // single
+		User user = UserMapper.mapCreateUser(userRequest, org);
+		user = userDao.createUser(user); // <-- persist first, capture the managed/returned entity
 
-		personnel.setActive(userRequest.isActive());
+//create user role
+		List<UserRole> userRoles = new ArrayList<UserRole>();
+		UserRole userRole;
+		Role role;
+		for (UUID roleId : userRequest.getRoles()) {
+//declare the variables userRole and role
+			role = roleDao.getRoleByRoleId(roleId);
+			
+			userRole = new UserRole();
+			
+			// set user role table
+			userRole.setUser(user);
+			userRole.setRole(role);
+			userRole.setOrganization(org);
+			userRole.setAssignedBy(loggedInUser);
+			userRole.setAssignedAt(LocalDateTime.now());
 
-		User user = new User();
-		user.setUsername(userRequest.getFirstName()); // make sure this exists on the DTO
-		user.setEmail(userRequest.getEmail());
-		user.setPasswordHash(userRequest.getPassword());
-		user.setOrganization(org);
+			userRoles.add(userRole);
+		}
 
-		user.setPersonnel(personnel);
-		user.setActive(userRequest.isActive());
-		user.setCreatedAt(LocalDateTime.now()); // required, not-null column
+		userRoleDao.createUserRole(userRoles);
 
-		User userResp = userDao.createUser(user);
-
-		CreateUserResponse response = UserMapper.mapCreateUserResponse(userResp);
+//		User userResp = new User();
+//		CreateUserResponse response = UserMapper.mapCreateUserResponse(userResp, userRoles);
+		CreateUserResponse response = UserMapper.mapCreateUserResponse(user, userRoles);
 
 		return ResponseEntity.ok().body(response);
 	}
@@ -215,13 +227,20 @@ public class UserService {
 
 		User userTobeUpdated = userDao.getUserbyUserId(userId);
 
-		System.out.println(userTobeUpdated.getEmail());
-		System.out.println(userTobeUpdated.getPersonnel().getFirstName());
+		if (!Strings.CI.equals(userTobeUpdated.getPersonnel().getPhoneNumber(),
+				profileUpdateRequest.getPhoneNumber())) {
+			personnelDao.checkUserPhoneNumberExists(profileUpdateRequest.getPhoneNumber());
+		}
+
+		if (!Strings.CI.equals(userTobeUpdated.getEmail(), profileUpdateRequest.getEmail())) {
+			userDao.checkUserEmailExists(profileUpdateRequest.getEmail());
+		}
+
+//		System.out.println(userTobeUpdated.getEmail());
+//		System.out.println(userTobeUpdated.getPersonnel().getFirstName());
 
 		if (StringUtils.isNotBlank(profileUpdateRequest.getEmail())
 				&& !profileUpdateRequest.getEmail().equalsIgnoreCase(userTobeUpdated.getEmail())) {
-
-			userDao.checkUserEmailExists(profileUpdateRequest.getEmail());
 
 			userTobeUpdated.setEmail(profileUpdateRequest.getEmail());
 			userTobeUpdated.getPersonnel().setEmail(profileUpdateRequest.getEmail());
@@ -235,17 +254,16 @@ public class UserService {
 		}
 
 		if (StringUtils.isNotBlank(profileUpdateRequest.getPhoneNumber())) {
+
 			userTobeUpdated.getPersonnel().setPhoneNumber(profileUpdateRequest.getPhoneNumber());
+
 		}
 
 		if (StringUtils.isNotBlank(profileUpdateRequest.getPassword())) {
 			userTobeUpdated.setPasswordHash(profileUpdateRequest.getPassword());
 		}
-
-		personnelDao.checkUserPhoneNumberExists(userTobeUpdated.getPersonnel().getPersonId(),
-				userTobeUpdated.getPersonnel().getPhoneNumber());
-
-//		userDao.checkUserEmailExists(userTobeUpdated.getUserId(),userTobeUpdated.getEmail());
+//		System.out.println("is the user active: " + profileUpdateRequest.isActive());
+		userTobeUpdated.setActive(profileUpdateRequest.isActive());
 
 		userDao.updatUser(userTobeUpdated);
 
@@ -255,11 +273,19 @@ public class UserService {
 		return ResponseEntity.ok().body(passwordResponse);
 
 	}
+
 	// Delete User By Admin
 
 	public ResponseEntity<PasswordResponse> deleteUser(UUID userId) throws Exception {
 
-		userDao.deleteUser(userId);
+		userDao.findById(userId).orElseThrow(() -> new Exception("User not found: " + userId));
+		
+		sessionDao.deleteByUserId(userId);// remove session of this user
+		
+
+		userRoleDao.deleteByUserId(userId); // removes roles assigned to this user
+
+		userDao.deleteUser(userId);// remove the user from user table
 
 		PasswordResponse passwordResponse = new PasswordResponse();
 		passwordResponse.setStatus("SUCCESS");

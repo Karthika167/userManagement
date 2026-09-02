@@ -1,10 +1,11 @@
 package com.avio.view;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class UserUpadateRequest {
 
-	
+	 
 	private String firstName;
 	
 	private String lastName;
@@ -17,9 +18,6 @@ public class UserUpadateRequest {
 	
 
 	private ArrayList<String> userRoles;
-	
-	
-
 	
 
 	public String getFirstName() {
