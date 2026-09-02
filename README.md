@@ -1,22 +1,10 @@
-**User Management API**
-*Build the Project*
+## Build and Run API
 
-Run the following command from the project root directory:
+### 1. Build the Application
+`mvn clean install`
 
-mvn clean install
+### 2. Navigate to Target Directory
+`cd target`
 
-This will clean the previous build files and create a new build.
-
-Run the Application
-
-After the build is completed, go to the target folder:
-
-cd target
-
-Then run the generated JAR file:
-
-java -jar userManagement-0.0.1-SNAPSHOT.jar
-Commands Summary
-mvn clean install
-cd target
-java -jar userManagement-0.0.1-SNAPSHOT.jar
+### 3. Run the Application
+`java -jar userManagement-0.0.1-SNAPSHOT.jar`
